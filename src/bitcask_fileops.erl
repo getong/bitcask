@@ -63,6 +63,12 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-ifdef(OTP_RELEASE).
+prim_file_list_dir(_Port, Directory) -> prim_file:list_dir(Directory).
+-else.
+prim_file_list_dir(Port, Directory) -> prim_file:list_dir(Port, Directory).
+-endif.
+
 %% @doc Open a new file for writing.
 %% Called on a Dirname, will open a fresh file in that directory.
 -spec create_file(Dirname :: string(), Opts :: [any()],
@@ -844,7 +850,7 @@ list_dir(_, 0) ->
     {error, efile_driver_unavailable};
 list_dir(Directory, Retries) when is_integer(Retries), Retries > 0 ->
     Port = get_efile_port(),
-    case prim_file:list_dir(Port, Directory) of
+    case prim_file_list_dir(Port, Directory) of
         {error, einval} ->
             clear_efile_port(),
             list_dir(Directory, Retries-1);
